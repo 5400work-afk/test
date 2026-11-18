@@ -1,0 +1,301 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>學習扶助考古題小幫手 (Copy)</title>
+<style>
+:root{--bg:#faf8f4;--card:#fff;--tx:#2a2a28;--mut:#77746c;--ac:#2f7d6d;--ac2:#e8f3f0;--bd:#e2ded4;--warn:#b5651d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1c1b;--card:#262826;--tx:#ecebe6;--mut:#a09d94;--ac:#6cc3b0;--ac2:#25352f;--bd:#3a3d3a;--warn:#e2a66a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1c1b;--card:#262826;--tx:#ecebe6;--mut:#a09d94;--ac:#6cc3b0;--ac2:#25352f;--bd:#3a3d3a;--warn:#e2a66a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:.2em 0}p.sub{color:var(--mut);margin:0 0 12px}
+nav{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap}
+nav button,button.b{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:10px;font:inherit;cursor:pointer}
+nav button.on,button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.5}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:10px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+select,input[type=text],input[type=number]{padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:99px;padding:1px 10px;font-size:.85rem;margin:2px 4px 2px 0}
+.src{font-size:.85rem;color:var(--mut)}.gen{border-left:4px solid var(--warn)}.mut{color:var(--mut)}
+.stem{white-space:pre-wrap}.pas{background:var(--ac2);border-radius:10px;padding:8px 12px;margin:6px 0}.pas summary{cursor:pointer;color:var(--ac);font-weight:600}.hide{display:none}details{margin-top:6px}
+</style></head><body><main>
+<h1>📚 學習扶助考古題小幫手</h1>
+<p class="sub">上傳考古題建立題庫 → 拍課本頁面 → 自動篩出同概念題目，並產出變化題</p>
+<nav id="nav"><button data-t="use" class="on">課堂篩題</button><button data-t="up">上傳考古題</button><button data-t="bank">題庫瀏覽</button></nav>
+<div id="msg" class="mut"></div>
+
+<section id="t-use">
+ <div class="card"><b>① 選擇條件　② 拍課本頁面</b>
+  <div class="row"><select id="uSub"><option>數學</option><option>國語</option><option>英語</option></select>
+  <select id="uGrade"></select>
+  <input id="uPage" type="file" accept="image/*" capture="environment"></div>
+  <div class="row"><label>每題變化題數 <input id="nGen" type="number" min="0" max="3" value="2" style="width:64px"></label>
+  <button class="b p" id="goUse">分析並篩題</button></div>
+  <div id="uInfo" class="mut"></div></div>
+ <div id="uOut"></div>
+ <div class="row hide" id="exp"><button class="b p" id="exW">匯出 Word</button><button class="b p" id="exP">匯出 PDF</button><label><input type="checkbox" id="exA" checked> 附參考答案頁</label></div>
+</section>
+
+<section id="t-up" class="hide">
+ <div class="card"><b>上傳考古題（PDF 或圖片，可一次多個檔案）</b>
+  <p class="mut">可一次選多個檔案（國語、數學、英文一起上傳）。檔名請含年度、年級、科目，例如「112_三年級_數學.pdf」，系統會自動分類；檔名辨識不到的欄位，才會使用下方的預設值。</p>
+  <div class="row"><select id="sSub"><option>數學</option><option>國語</option><option>英語</option></select>
+  <select id="sGrade"></select>
+  <input id="sYear" type="text" placeholder="預設年度，如 112" style="width:130px"></div>
+  <input id="sFiles" type="file" accept="image/*,application/pdf,.pdf" multiple>
+  <div class="row"><button class="b p" id="goUp">解析並存入題庫</button></div>
+  <div id="upInfo" class="mut"></div></div>
+</section>
+
+<section id="t-bank" class="hide"><div class="row"><select id="bSub"><option value="">全部科目</option><option>數學</option><option>國語</option><option>英語</option></select>
+ <span id="bCnt" class="mut"></span></div><div id="bOut"></div></section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@7.8.2/build/index.js"></script>
+<script>
+const GRADES=["一年級","二年級","三年級","四年級","五年級","六年級"];
+for(const id of["uGrade","sGrade"])document.getElementById(id).innerHTML=GRADES.map(g=>`<option>${g}</option>`).join("");
+const $=id=>document.getElementById(id);
+let db=null,sample=null,AUD={},Q=[],ADMIN=false,OUT=[],dl=null;
+const say=t=>$("msg").textContent=t||"";
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b));
+ for(const t of["use","up","bank"])$("t-"+t).classList.toggle("hide",t!==b.dataset.t)});
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function init(){
+ try{db=await claude.use("db");sample=await claude.use("sample");const u=await claude.use("user");ADMIN=!!(u&&u.canEdit());dl=await claude.use("downloads")}catch(e){}
+ if(!ADMIN)document.querySelectorAll('#nav button[data-t="up"],#nav button[data-t="bank"]').forEach(b=>b.remove());
+ else document.querySelector('#nav button[data-t="bank"]').textContent='題庫管理';
+ if(!sample)say("⚠ 目前無法使用 AI 功能（請在 claude.ai 開啟並允許）。");
+ if(!db)say("⚠ 無法連線題庫（請登入 claude.ai 開啟）。");
+ else{db.collection("audio").onSnapshot(a=>{AUD={};a.docs.forEach(d=>AUD[d.id]=d.data().url);renderBank()},()=>{});}
+ if(db)db.collection("questions").onSnapshot(s=>{Q=s.docs.map(d=>({id:d.id,...d.data()}));renderBank()},()=>say("題庫讀取失敗"));
+}
+function shrink(file,max=1500){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{
+ const r=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement("canvas");
+ c.width=im.width*r;c.height=im.height*r;c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+ c.toBlob(b=>b?res(b):rej(new Error("圖片處理失敗")),"image/jpeg",.85)};im.onerror=()=>rej(new Error("無法讀取圖片"));
+ im.src=URL.createObjectURL(file)})}
+
+/* 檔名辨識：年度／年級／科目 */
+const CN={"一":1,"二":2,"三":3,"四":4,"五":5,"六":6};
+function parseName(n){
+ const o={name:n};n=n.replace(/\.[^.]+$/,"");
+ if(/國語|國文|chinese|chi\b/i.test(n))o.sub="國語";else if(/數學|math/i.test(n))o.sub="數學";else if(/英語|英文|english|eng/i.test(n))o.sub="英語";
+ let m=n.match(/([一二三四五六])\s*年級/)||n.match(/(?:^|[^0-9])([1-6])\s*年級/)||n.match(/grade\s*([1-6])|(?:^|[^0-9a-z])g([1-6])(?!\d)/i)||n.match(/小([一二三四五六1-6])/);
+ if(m){const v=m[1]||m[2];o.grade=GRADES[(CN[v]||+v)-1]}
+ m=n.match(/(\d{2,3})\s*年/)||n.match(/(20\d\d)/)||n.match(/(?:^|[^0-9])(1[0-4]\d|9\d)(?![0-9])/);
+ if(m){let y=+m[1];if(y>1911)y-=1911;o.year=String(y)}
+ return o}
+const tag=(b,f)=>{b.meta=parseName(f.name);return b};
+$("sFiles").onchange=()=>{const fs=[...$("sFiles").files];
+ const t=(v,l)=>v?`<span class="tag">${esc(v)}</span>`:`<span class="tag" style="background:none;color:var(--warn);border:1px dashed var(--warn)">${l}未辨識</span>`;
+ $("upInfo").innerHTML=fs.length?'<b>檔名辨識結果</b>（未辨識的欄位使用上方預設值）'+fs.map(f=>{const o=parseName(f.name);return `<div class="row">${esc(f.name)} ${t(o.year&&o.year+"年","年度")}${t(o.grade,"年級")}${t(o.sub,"科目")}</div>`}).join(""):""};
+/* PDF/圖片 → 逐頁圖片 */
+const MAXP=30;
+async function toImages(files){
+ const out=[];
+ for(const f of files){
+  if(f.type==='application/pdf'||/\.pdf$/i.test(f.name)){
+   if(!window.pdfjsLib)throw new Error('PDF 讀取元件未載入，請重新整理');
+   pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+   const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+   const np=Math.min(pdf.numPages,MAXP);
+   if(pdf.numPages>MAXP)say(`「${f.name}」共 ${pdf.numPages} 頁，只處理前 ${MAXP} 頁，其餘請分檔上傳。`);
+   for(let p=1;p<=np;p++){
+    $("upInfo").textContent=`讀取 ${f.name} 第 ${p}/${np} 頁…`;
+    const pg=await pdf.getPage(p),v1=pg.getViewport({scale:1}),s=1500/Math.max(v1.width,v1.height)*1.0,v=pg.getViewport({scale:s}),c=document.createElement('canvas');
+    c.width=v.width;c.height=v.height;
+    await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise;
+    out.push(tag(await new Promise(r=>c.toBlob(r,'image/jpeg',.85)),f));
+   }
+  }else out.push(tag(await shrink(f),f));
+ }
+ return out;
+}
+/* 上傳考古題 */
+$("goUp").onclick=async()=>{
+ const files=[...$("sFiles").files];if(!files.length)return say("請先選擇檔案");let fs=[];
+ if(!sample||!db)return say("AI 或題庫尚未就緒");
+ $("goUp").disabled=true;let n=0;FC.f=0;FC.m=0;
+ try{fs=await toImages(files);let carry="",lastName="";for(let i=0;i<fs.length;i++){
+  $("upInfo").textContent=`AI 解析第 ${i+1}/${fs.length} 頁（${fs[i].meta?.name||""}）…`;
+  const img=fs[i],M={sub:img.meta?.sub||$("sSub").value,grade:img.meta?.grade||$("sGrade").value,year:img.meta?.year||$("sYear").value};{const nm=img.meta?.name||"";if(nm!==lastName){carry="";lastName=nm}}
+  const prompt=`這是臺灣國小學習扶助「${M.sub}」考古題的圖片。請切出每一題，只輸出 JSON 陣列，每題欄位：
+{"qno":題號(數字),"year":"${M.year||"試卷上的年度，不明填空字串"}","grade":"${M.grade}","stem":"完整題幹(含選項，圖形請以文字描述)","answer":"答案，不確定填空字串","concept":"一個簡短的基本概念名稱，如「兩位數加法進位」","tags":["1-3個相關概念關鍵字"],"passage":"若為閱讀文章題組，這裡完整逐字抄錄整篇文章（含標題與分段，不可省略或摘要），同一篇文章的各題 passage 必須完全相同；不是文章題組填空字串","hasFig":true或false,"fig":null或[左,上,寬,高],"box":[左,上,寬,高]}
+說明：hasFig 表示這題是否含圖形（圖案、排列的物品、數線、表格、幾何圖、插圖等，凡是文字無法完整表達的都算）。fig 是圖形本身的位置，框要緊貼圖形邊緣，上下左右都不可包含任何題號或文字（包括上一題的題幹、下一題的題號），寧可略緊也不要多框，box 是整題（題號、題幹、圖、選項）的位置。位置是 [左,上,寬,高]，皆為占整張圖片的 0~1 比例，左上角為 0,0。不含圖形時 hasFig 填 false、fig 填 null。${carry?`
+前一頁的文章如下，若本頁的題目是針對它而問，請把它原文填入 passage：
+${carry}`:""}
+不要輸出其他文字。`;
+  const arr=await ask(prompt,{images:[img],cache:false});
+  {const ps=(Array.isArray(arr)?arr:[]).map(q=>q.passage).filter(Boolean);if(ps.length)carry=String(ps[ps.length-1]).slice(0,3000)}
+  for(const q of(Array.isArray(arr)?arr:[])){
+   const clean=v=>String(v??"").replace(/[^0-9A-Za-z]/g,"");const id=`${{"數學":"math","國語":"chi","英語":"eng"}[M.sub]||"x"}-${clean(M.year||q.year)||"y0"}-g${GRADES.indexOf(M.grade)+1}-q${clean(q.qno)||Date.now()}`;
+   await db.collection("questions").doc(id).set({subject:M.sub,year:String(M.year||q.year||"不明"),grade:M.grade,...(await figMeta(img,q)),qno:q.qno??null,passage:String(q.passage||"").slice(0,4000),stem:q.stem||"",answer:q.answer||"",concept:q.concept||"",tags:q.tags||[],kind:"原考古題"});n++}
+ }$("upInfo").textContent=`✅ 已存入 ${n} 題（含圖 ${FC.f} 題${FC.m?`；另有 ${FC.m} 題含圖但沒截到，請到「題庫管理」手動補圖`:""}）。`}catch(e){$("upInfo").textContent="失敗："+(e.message||e.code||e)}
+ $("goUp").disabled=false};
+
+/* ===== 圖形、匯出 ===== */
+const loadImg=u=>new Promise((r,j)=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>j(new Error("圖片載入失敗"));i.src=u});
+const toBytes=d=>Uint8Array.from(atob(d.split(",")[1]),c=>c.charCodeAt(0));
+const toBlob=d=>new Blob([toBytes(d)],{type:"image/jpeg"});
+const FC={f:0,m:0};
+async function figMeta(blob,q){let u="";
+ try{u=await cropFig(blob,q.fig)||(q.hasFig?await cropFig(blob,q.box):"")}catch(e){}
+ if(u)FC.f++;else if(q.hasFig)FC.m++;
+ return{img:u,needFig:!!q.hasFig&&!u}}
+async function cropFig(blob,f){
+ if(!Array.isArray(f)||f.length!==4||f.some(v=>typeof v!=="number"))return"";
+ if(f.some(v=>v>1))f=f.map(v=>v/100);
+ const im=await loadImg(URL.createObjectURL(blob));
+ let[x,y,w,h]=f;const p=.006;x=Math.max(0,x-p);y=Math.max(0,y-p);w=Math.min(1-x,w+2*p);h=Math.min(1-y,h+2*p);
+ if(w<.05||h<.03)return"";
+ const sw=im.width*w,sh=im.height*h,s=Math.min(1,640/sw),c=document.createElement("canvas");
+ c.width=Math.round(sw*s);c.height=Math.round(sh*s);
+ c.getContext("2d").drawImage(im,im.width*x,im.height*y,sw,sh,0,0,c.width,c.height);
+ return c.toDataURL("image/jpeg",.75)}
+function cleanSvg(s){
+ s=String(s||"").trim();
+ if(!/^<svg[\s>]/i.test(s)||/<script|on\w+\s*=|<foreignObject|<image|href\s*=/i.test(s))return"";
+ if(!/xmlns=/i.test(s))s=s.replace(/<svg/i,'<svg xmlns="http://www.w3.org/2000/svg"');
+ const vb=s.match(/viewBox\s*=\s*["']\s*[\d.\-]+[\s,]+[\d.\-]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i);
+ if(vb&&!/<svg[^>]*\swidth=/i.test(s))s=s.replace(/<svg/i,`<svg width="${vb[1]}" height="${vb[2]}"`);
+ return s}
+const svgUrl=s=>"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(s);
+function figHtml(q){let u=q.img||"";if(!u){const s=cleanSvg(q.svg);if(s)u=svgUrl(s)}
+ return u?`<img src="${u}" alt="題目圖" style="max-width:100%;max-height:260px;background:#fff;border:1px solid var(--bd);border-radius:8px;margin:6px 0">`:""}
+async function rast(url){
+ const i=await loadImg(url),w=i.naturalWidth||600,h=i.naturalHeight||300,k=Math.min(1,600/w),c=document.createElement("canvas");
+ c.width=Math.round(w*k);c.height=Math.round(h*k);const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(i,0,0,c.width,c.height);
+ const d=c.toDataURL("image/jpeg",.9);return{url:d,bytes:toBytes(d),w:c.width,h:c.height}}
+const seen=new Set();
+async function buildItems(){seen.clear();
+ const out=[];
+ for(const o of OUT){let img=null;
+  try{if(o.img)img=await rast(o.img);else{const s=cleanSvg(o.svg);if(s)img=await rast(svgUrl(s))}}catch(e){}
+  const pas=o.passage||"",sp=!!pas&&!seen.has(pas);if(pas)seen.add(pas);
+  out.push({tag:o.gen?"變化題":"原考古題",src:o.src||src(o),stem:o.stem||"",answer:o.answer||"",passage:pas,showPas:sp,img})}
+ return out}
+async function save(name,data){if(!dl)throw new Error("此環境無法下載檔案");await dl.save({filename:name,data})}
+
+async function exportWord(){
+ const items=await buildItems(),D=docx,F={ascii:"Calibri",eastAsia:"微軟正黑體"},ch=[];
+ const P=(t,o={})=>new D.Paragraph({spacing:{before:o.before||0,after:60},children:[new D.TextRun({text:t,font:F,size:o.size||26,bold:o.bold,color:o.color})]});
+ ch.push(P("學習扶助練習題",{size:36,bold:true}));
+ items.forEach((it,i)=>{
+  if(it.showPas){ch.push(P("【閱讀文章】",{bold:true,before:280,size:22}));it.passage.split("\n").forEach(t=>ch.push(P(t,{size:24})))}
+  ch.push(P(`${i+1}. ${it.tag}｜${it.src}`,{size:20,bold:true,color:"666666",before:280}));
+  it.stem.split("\n").forEach(t=>ch.push(P(t)));
+  if(it.img){const w=Math.min(it.img.w,420);ch.push(new D.Paragraph({children:[new D.ImageRun({data:it.img.bytes,transformation:{width:w,height:Math.round(w*it.img.h/it.img.w)}})]}))}});
+ if($("exA").checked){
+  ch.push(new D.Paragraph({children:[new D.PageBreak()]}));ch.push(P("參考答案",{size:32,bold:true}));
+  items.forEach((it,i)=>{ch.push(P(`${i+1}. （${it.tag}）`,{bold:true,size:22}));String(it.answer||"（無）").split("\n").forEach(t=>ch.push(P(t,{size:24})))})}
+ await save("學習扶助練習題.docx",await D.Packer.toBlob(new D.Document({sections:[{children:ch}]})))}
+
+function makePDF(js){
+ const enc=new TextEncoder(),parts=[],offs=[];let len=0,n=js.length;
+ const add=b=>{const u=typeof b==="string"?enc.encode(b):b;parts.push(u);len+=u.length};
+ add("%PDF-1.4\n");
+ offs[1]=len;add("1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n");
+ offs[2]=len;add(`2 0 obj\n<</Type/Pages/Kids[${js.map((_,k)=>`${3+3*k} 0 R`).join(" ")}]/Count ${n}>>\nendobj\n`);
+ js.forEach((j,k)=>{const p=3+3*k,cs=`q 595 0 0 842 0 0 cm /I${k} Do Q`;
+  offs[p]=len;add(`${p} 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Resources<</XObject<</I${k} ${p+2} 0 R>>>>/Contents ${p+1} 0 R>>\nendobj\n`);
+  offs[p+1]=len;add(`${p+1} 0 obj\n<</Length ${cs.length}>>\nstream\n${cs}\nendstream\nendobj\n`);
+  offs[p+2]=len;add(`${p+2} 0 obj\n<</Type/XObject/Subtype/Image/Width ${j.w}/Height ${j.h}/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length ${j.bytes.length}>>\nstream\n`);add(j.bytes);add("\nendstream\nendobj\n")});
+ const total=3+3*n,xr=len;let x=`xref\n0 ${total}\n0000000000 65535 f \n`;
+ for(let i=1;i<total;i++)x+=String(offs[i]).padStart(10,"0")+" 00000 n \n";
+ add(x+`trailer\n<</Size ${total}/Root 1 0 R>>\nstartxref\n${xr}\n%%EOF`);
+ return new Blob(parts,{type:"application/pdf"})}
+
+async function exportPDF(){
+ const items=await buildItems(),S=2,W=794*S,H=1123*S,M=60*S,pages=[],FONT='"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
+ let c,y;
+ const np=()=>{c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,W,H);y=M;pages.push(c)};
+ const ensure=h=>{if(!c||y+h>H-M)np()};
+ const text=(t,size,bold,color)=>{
+  const lh=size*S*1.6,gx=()=>{const g=c.getContext("2d");g.font=`${bold?"bold ":""}${size*S}px ${FONT}`;g.fillStyle=color||"#000";return g};
+  ensure(lh);let g=gx(),line="";
+  const out=()=>{ensure(lh);g=gx();g.fillText(line,M,y+size*S);y+=lh};
+  for(const ch of t){if(g.measureText(line+ch).width>W-2*M){out();line=ch}else line+=ch}
+  out()};
+ np();text("學習扶助練習題",26,true);y+=8*S;
+ for(let i=0;i<items.length;i++){const it=items[i];
+  y+=10*S;if(it.showPas){text("【閱讀文章】",15,true);for(const t of it.passage.split("\n"))text(t,17);y+=8*S}text(`${i+1}. ${it.tag}｜${it.src}`,13,true,"#666");
+  for(const t of it.stem.split("\n"))text(t,18);
+  if(it.img){const dw=Math.min(it.img.w,420)*S,dh=dw*it.img.h/it.img.w;ensure(dh+10*S);
+   c.getContext("2d").drawImage(await loadImg(it.img.url),M,y,dw,dh);y+=dh+10*S}}
+ if($("exA").checked){np();text("參考答案",24,true);
+  items.forEach((it,i)=>{text(`${i+1}. （${it.tag}）`,14,true,"#666");String(it.answer||"（無）").split("\n").forEach(t=>text(t,17))})}
+ const js=pages.map(p=>{const d=p.toDataURL("image/jpeg",.9);return{bytes:toBytes(d),w:p.width,h:p.height}});
+ await save("學習扶助練習題.pdf",makePDF(js))}
+for(const[id,fn]of[["exW",exportWord],["exP",exportPDF]])$(id).onclick=async()=>{
+ const b=$(id);b.disabled=true;say("產生檔案中…");
+ try{await fn();say("")}catch(e){say("匯出失敗："+(e.message||e.code||e))}b.disabled=false};
+/* ===== /圖形、匯出 ===== */
+/* AI 呼叫：間隔 + 太頻繁時自動等待重試 */
+let lastCall=0;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function ask(p,o){
+ for(let t=0;;t++){
+  const gap=4000-(Date.now()-lastCall);if(gap>0)await wait(gap);
+  lastCall=Date.now();
+  try{return await sample.json(p,o)}
+  catch(e){const m=String(e.message||e.code||e);
+   if(!/too often|rate|429|try again/i.test(m)||t>=5)throw e;
+   for(let s=15*(t+1);s>0;s--){say(`AI 呼叫太頻繁，${s} 秒後自動重試（第 ${t+1}/5 次）…`);await wait(1000)}
+   say("")}}}
+/* 課堂篩題 */
+const src=q=>`${q.year}年・${q.grade}・第 ${q.qno??"?"} 題`;
+function audioHtml(q){const u=q.subject==="英語"&&AUD[q.year+"-g"+(GRADES.indexOf(q.grade)+1)];return u&&/聽力|聽辨|聽寫/.test(q.stem||"")?`<div style="margin:6px 0"><audio controls preload="none" src="${esc(u)}" style="width:100%;max-width:420px"></audio><div class="mut" style="font-size:.8rem">🔊 本年級整份聽力音檔（請依題號找到對應段落）</div></div>`:""}
+function card(q,extra=""){return `<div class="card ${extra}"><div class="src">${extra?"🔸 變化題":"原考古題"}｜${esc(q.src||src(q))}</div>
+ ${q.passage?`<details open class="pas"><summary>📖 閱讀文章</summary><div class="stem">${esc(q.passage)}</div></details>`:""}<div class="stem">${esc(q.stem)}</div>${audioHtml(q)}${figHtml(q)}<div>${q.concept?`<span class="tag">${esc(q.concept)}</span>`:""}</div>
+ ${q.answer?`<details><summary>看答案</summary>${esc(q.answer)}</details>`:""}</div>`}
+$("goUse").onclick=async()=>{
+ const f=$("uPage").files[0];if(!f)return say("請先拍照或選擇課本頁面");
+ if(!sample)return say("AI 尚未就緒");
+ const sub=$("uSub").value,gr=$("uGrade").value,pool=Q.filter(q=>q.subject===sub&&q.grade===gr);
+ if(!pool.length)return say(`題庫目前沒有「${sub}・${gr}」的題目，請先上傳考古題。`);
+ say("");$("goUse").disabled=true;$("uOut").innerHTML="";
+ try{
+  $("uInfo").textContent="辨識課本頁面…";
+  const concepts=[...new Set(pool.map(q=>q.concept).filter(Boolean))];
+  const r=await ask(`這是「${sub}」${gr}課本的一頁。請判斷此頁教的概念，並從下列題庫概念清單挑出相關者（可多個，沒有就給空陣列）。只輸出 JSON：{"page":"此頁重點一句話","matched":["清單中的概念原文"]}
+概念清單：${JSON.stringify(concepts)}`,{images:[await shrink(f)],cache:false});
+  const m=new Set(r.matched||[]),hit=pool.filter(q=>m.has(q.concept));OUT=hit.map(q=>({...q}));
+  $("uInfo").innerHTML=`此頁重點：${esc(r.page)}　→ 找到 <b>${hit.length}</b> 題相關考古題`;
+  $("uOut").innerHTML=hit.map(q=>card(q)).join("")||'<div class="card mut">沒有符合的題目，可再多上傳考古題。</div>';
+  const k=Math.min(3,+$("nGen").value||0);
+  if(k&&hit.length){
+   const seen=new Set();
+   for(const q of hit.slice(0,6)){
+    if(seen.has(q.concept))continue;seen.add(q.concept);
+    $("uInfo").innerHTML+=`<br>產生變化題中：${esc(q.concept)}…`;
+    const g=await ask(`依據下列考古題的概念，出 ${k} 題「同概念、不同情境或數字」的新題（${sub}・${gr}，難度與原題相當，題型相同）。答案務必正確。只輸出 JSON 陣列：[{"stem":"題幹含選項（若原題有圖，題幹請寫明「請看圖」）","answer":"答案與簡短解析","svg":"若原題有圖，請畫出配合新題的簡單圖形，格式為完整的 <svg viewBox='0 0 400 200'>…</svg>，只用基本圖形與文字，不要 script；沒有圖填空字串"}]
+${q.passage?"原題所屬的閱讀文章如下，新題請以這篇文章為依據出題（題幹中不要重述整篇文章）：\n"+q.passage+"\n\n":""}原題：${q.stem}${q.img?"\n（附圖為原題的圖，請參考其樣式設計新題的圖）":""}`,{cache:false,...(q.img?{images:[toBlob(q.img)]}:{})});
+    const html=(Array.isArray(g)?g:[]).map(x=>{const o={stem:x.stem,answer:x.answer,svg:x.svg,passage:q.passage||"",concept:q.concept,src:`改編自 ${src(q)}`};OUT.push({...o,gen:true});return card(o,"gen")}).join("");
+    $("uOut").insertAdjacentHTML("beforeend",html)}
+   $("uInfo").innerHTML=`此頁重點：${esc(r.page)}　→ ${hit.length} 題考古題＋變化題（變化題請教師審閱後使用）`}
+ }catch(e){$("uInfo").textContent="失敗："+(e.message||e.code||e)}
+ $("exp").classList.toggle("hide",!OUT.length);$("goUse").disabled=false};
+
+/* 題庫瀏覽 */
+function renderBank(){const s=$("bSub").value,l=Q.filter(q=>!s||q.subject===s).sort((a,b)=>(a.year+a.grade+(a.qno||0)).localeCompare(b.year+b.grade+(b.qno||0)));
+ $("bCnt").textContent=`共 ${l.length} 題`;$("bOut").innerHTML=l.map(q=>card(q)+(ADMIN?`<div class="row"><input type="text" value="${esc(q.concept)}" style="flex:1"><button class="b" data-sv="${esc(q.id)}">儲存概念</button><button class="b" data-del="${esc(q.id)}">刪除</button><label class="b" style="font-size:.85rem">${q.img?"換圖":"補圖"}<input type="file" accept="image/*" data-fi="${esc(q.id)}" hidden></label>${q.img?`<button class="b" data-rm="${esc(q.id)}">移除圖</button>`:""}${q.needFig?'<span class="tag" style="background:none;color:var(--warn);border:1px dashed var(--warn)">含圖但未擷取</span>':""}</div>`:"")).join("")||'<div class="card mut">題庫是空的，先到「上傳考古題」建立。</div>'}
+$("bSub").onchange=renderBank;
+$("bOut").onchange=async e=>{const t=e.target;if(!t.dataset.fi||!ADMIN||!db||!t.files[0])return;say("上傳圖片中…");
+ try{const b=await shrink(t.files[0],700);const d=await new Promise((r,j)=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=j;f.readAsDataURL(b)});
+  await db.collection("questions").doc(t.dataset.fi).update({img:d,needFig:false});say("✅ 已更新圖片")}catch(x){say("圖片更新失敗："+(x.message||x.code||x))}};
+$("bOut").onclick=async e=>{const b=e.target.closest("button");if(!b||!ADMIN||!db)return;
+ if(b.dataset.rm){try{await db.collection("questions").doc(b.dataset.rm).update({img:""})}catch(x){say("移除失敗")}}
+ else if(b.dataset.sv){try{await db.collection("questions").doc(b.dataset.sv).update({concept:b.parentNode.querySelector("input").value.trim()});b.textContent="已儲存 ✓"}catch(x){say("儲存失敗")}}
+ else if(b.dataset.del){if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="再按一次確定刪除";return}
+  try{await db.collection("questions").doc(b.dataset.del).delete()}catch(x){say("刪除失敗")}}};
+init();
+</script></main></body></html>
+
+</body></html>
